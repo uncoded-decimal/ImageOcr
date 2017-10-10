@@ -1,11 +1,13 @@
 package com.example.aditya.imageocr;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.SparseArray;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.android.gms.vision.Frame;
@@ -20,20 +22,23 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     StringBuilder detectedText;
-
+    EditText edit;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         Bitmap bmp= BitmapFactory.decodeResource(this.getResources(), R.drawable.rret);
         detectedText= new StringBuilder();
-        gettingTextFromBitmap(bmp);
 
-        TextView textView = (TextView)findViewById(R.id.me);
-        textView.setText(detectedText);
+            Bitmap bitmap = Bitmap.createBitmap(bmp,0,0,bmp.getWidth(),bmp.getHeight()/2+40);
+            gettingTextFromBitmap(bitmap);
 
-
+        bitmap = Bitmap.createBitmap(bmp,0,bmp.getHeight()/2,bmp.getWidth(),bmp.getHeight()/2);
+        gettingTextFromBitmap(bitmap);
+        edit = (EditText) findViewById(R.id.me);
+        edit.setText(detectedText,EditText.BufferType.EDITABLE);
     }
 
 
