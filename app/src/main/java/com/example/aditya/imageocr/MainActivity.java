@@ -3,33 +3,50 @@ package com.example.aditya.imageocr;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.SparseArray;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import static com.example.aditya.imageocr.R.id.imageView;
+
 public class MainActivity extends AppCompatActivity {
 
     StringBuilder detectedText;
     EditText edit;
+    private static final int PICK_IMAGE=100;
+    Uri imageUri;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Bitmap bmp=null;
+        openGallery();
 
-        Bitmap bmp= BitmapFactory.decodeResource(this.getResources(), R.drawable.rret);
+        try{
+        bmp= BitmapFactory.decodeStream(getContentResolver().openInputStream(imageUri));}
+        catch (FileNotFoundException e){
+            e.printStackTrace();
+        }
         detectedText= new StringBuilder();
 
             Bitmap bitmap = Bitmap.createBitmap(bmp,0,0,bmp.getWidth(),bmp.getHeight()/2+40);
@@ -84,4 +101,19 @@ public class MainActivity extends AppCompatActivity {
     }
     bitmap.recycle();
 
-}}
+}
+    private void openGallery(){
+        Intent gallery= new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(gallery,PICK_IMAGE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode,int resultCode, Intent data){
+        super.onActivityResult(requestCode,resultCode,data);
+        ImageView imageView = (ImageView)findViewById(R.id.imageView);
+        if(requestCode==RESULT_OK || requestCode==PICK_IMAGE){
+            imageUri=data.getData();
+            imageView.setImageURI(imageUri);
+        }
+    }
+}
