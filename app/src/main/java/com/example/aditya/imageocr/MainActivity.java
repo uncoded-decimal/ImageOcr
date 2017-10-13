@@ -1,5 +1,6 @@
 package com.example.aditya.imageocr;
 
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,6 +19,7 @@ import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,34 +30,22 @@ import static com.example.aditya.imageocr.R.id.imageView;
 
 public class MainActivity extends AppCompatActivity {
 
-    StringBuilder detectedText;
+    String detectedText;
     EditText edit;
     private static final int PICK_IMAGE=100;
     Uri imageUri;
-
+    ImageView imageView;
+    Bitmap bmp=null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Bitmap bmp=null;
-        openGallery();
-
-        try{
-        bmp= BitmapFactory.decodeStream(getContentResolver().openInputStream(imageUri));}
-        catch (FileNotFoundException e){
-            e.printStackTrace();
-        }
-        detectedText= new StringBuilder();
-
-            Bitmap bitmap = Bitmap.createBitmap(bmp,0,0,bmp.getWidth(),bmp.getHeight()/2+40);
-            gettingTextFromBitmap(bitmap);
-
-        bitmap = Bitmap.createBitmap(bmp,0,bmp.getHeight()/2,bmp.getWidth(),bmp.getHeight()/2);
-        gettingTextFromBitmap(bitmap);
         edit = (EditText) findViewById(R.id.me);
-        edit.setText(detectedText,EditText.BufferType.EDITABLE);
+        imageView=(ImageView)findViewById(R.id.imageView);
+        Intent gallery = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(gallery, PICK_IMAGE);
     }
 
 
@@ -91,8 +81,7 @@ public class MainActivity extends AppCompatActivity {
 
             for (TextBlock textBlock : textBlocks) {
                 if (textBlock != null && textBlock.getValue() != null) {
-                    detectedText.append(textBlock.getValue());
-                    detectedText.append("\n");
+                    detectedText=detectedText+textBlock.getValue()+"\n";
                 }
             }
 
@@ -100,20 +89,36 @@ public class MainActivity extends AppCompatActivity {
         textRecognizer.release();
     }
     bitmap.recycle();
-
 }
-    private void openGallery(){
-        Intent gallery= new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(gallery,PICK_IMAGE);
-    }
 
     @Override
-    protected void onActivityResult(int requestCode,int resultCode, Intent data){
-        super.onActivityResult(requestCode,resultCode,data);
-        ImageView imageView = (ImageView)findViewById(R.id.imageView);
-        if(requestCode==RESULT_OK || requestCode==PICK_IMAGE){
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==RESULT_OK||requestCode==PICK_IMAGE){
             imageUri=data.getData();
             imageView.setImageURI(imageUri);
+                getresult();
         }
+        else if(requestCode==RESULT_CANCELED){
+            finish();
+        }
+    }
+
+    void getresult(){
+        try {
+            bmp=MediaStore.Images.Media.getBitmap(this.getContentResolver(),imageUri);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        catch ( NullPointerException f){
+            f.printStackTrace();
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(bmp,0,0,bmp.getWidth(),bmp.getHeight()/2+40);
+        gettingTextFromBitmap(bitmap);
+
+        bitmap = Bitmap.createBitmap(bmp,0,bmp.getHeight()/2,bmp.getWidth(),bmp.getHeight()/2);
+        gettingTextFromBitmap(bitmap);
+        edit.setText(detectedText);
     }
 }
