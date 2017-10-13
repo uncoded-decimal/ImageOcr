@@ -30,7 +30,7 @@ import static com.example.aditya.imageocr.R.id.imageView;
 
 public class MainActivity extends AppCompatActivity {
 
-    String detectedText;
+    StringBuilder detectedText;
     EditText edit;
     private static final int PICK_IMAGE=100;
     Uri imageUri;
@@ -81,7 +81,8 @@ public class MainActivity extends AppCompatActivity {
 
             for (TextBlock textBlock : textBlocks) {
                 if (textBlock != null && textBlock.getValue() != null) {
-                    detectedText=detectedText+textBlock.getValue()+"\n";
+                    detectedText.append(textBlock.getValue());
+                    detectedText.append("\n");
                 }
             }
 
@@ -113,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
         catch ( NullPointerException f){
             f.printStackTrace();
         }
+        detectedText=new StringBuilder();
 
         Bitmap bitmap = Bitmap.createBitmap(bmp,0,0,bmp.getWidth(),bmp.getHeight()/2+40);
         gettingTextFromBitmap(bitmap);
