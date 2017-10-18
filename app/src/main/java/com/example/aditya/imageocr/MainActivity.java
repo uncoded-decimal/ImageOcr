@@ -10,9 +10,12 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.SparseArray;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
@@ -31,11 +34,12 @@ import static com.example.aditya.imageocr.R.id.imageView;
 public class MainActivity extends AppCompatActivity {
 
     StringBuilder detectedText;
-    EditText edit;
+    EditText edit, title;
     private static final int PICK_IMAGE=100;
     Uri imageUri;
     ImageView imageView;
     Bitmap bmp=null;
+    DBHelper db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,9 +47,24 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         edit = (EditText) findViewById(R.id.me);
+        title = (EditText)findViewById(R.id.title);
         imageView=(ImageView)findViewById(R.id.imageView);
         Intent gallery = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(gallery, PICK_IMAGE);
+
+        db = new DBHelper(this);
+
+        Button save = (Button)findViewById(R.id.save);
+        save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String t = title.getText().toString();
+                String d = detectedText.toString();
+                db.addData(t,d);
+                Toast.makeText(getApplicationContext(),"Successfully Added!",Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
     }
 
 
@@ -122,5 +141,6 @@ public class MainActivity extends AppCompatActivity {
         bitmap = Bitmap.createBitmap(bmp,0,bmp.getHeight()/2,bmp.getWidth(),bmp.getHeight()/2);
         gettingTextFromBitmap(bitmap);
         edit.setText(detectedText);
+        edit.setLines(10);
     }
 }
