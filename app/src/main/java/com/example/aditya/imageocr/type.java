@@ -14,4 +14,12 @@ public class type {
         title=a;
         data=b;
     }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getData() {
+        return data;
+    }
 }
